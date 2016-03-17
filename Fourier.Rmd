@@ -1,0 +1,155 @@
+---
+title: "FFT"
+output: 
+  slidy_presentation: 
+    css: ~/Documents/Projects/Packages/represtools/vignettes/My.css
+---
+
+```{r, include=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+#
+
+> "You say you want a convolution? Well, you know we all want to change the world."
+
+A convolution is merely the sum of a set of numbers
+
+# Pascal's triangle
+
+This is just a continuous sum of a vector which grows by one element at each iteration.
+
+```{r }
+pascalLoop <- function(n){
+  x <- numeric(n)
+  n_1 <- n - 1
+  x <- c(1, rep(0, n_1))
+  for (i in seq.int(n_1)){
+    x <- c(x[1], tail(x, n_1) + head(x, n_1))
+  }
+  
+  x
+}
+
+pascalLoop(4)
+```
+
+# Pascal's triangle with FFT
+
+```{r }
+pascalFFT <- function(n){
+  x <- c(1, 1, rep(0, n-2)) 
+  x <- fft(x)
+  x <- x ^ (n-1)
+  x <- fft(x, inverse = TRUE)
+  x <- round(Re(x / n) )
+
+  x
+}
+
+pascalFFT(4)
+```
+
+```{r echo=FALSE, eval=FALSE}
+identical(pascalLoop(4), pascalFFT(4))
+head(pascalFFT(55))
+head(pascalLoop(60))
+identical(pascalLoop(60), pascalFFT(60))
+```
+
+# Shift development patterns
+
+We can also do this
+
+```{r }
+AccidentQuarter <- c(0.25, 0.25, 0.25, 0.25, 0, 0, 0, 0)
+AccidentYear <- c(0, 0.4, 0.4, 0.2, 0, 0, 0, 0)
+AccidentYear <- fft(fft(AccidentYear) * fft(AccidentQuarter), inverse = TRUE) %>% Re()
+AccidentYear <- AccidentYear / 8
+round(AccidentYear, 4)
+```
+
+# Aggregate loss distributions
+
+* FFT is great for generating aggregate loss distributions. 
+* Adding probability is a lot like adding integers. Rather than raising to a power, we use a probability generating function.
+* FFT is a discrete approximation, not a closed form solution. Careful with how many values you use!
+
+# How do we do it?
+
+1. Form a vector with the severity probabilities
+2. Take the Fourier transform
+3. Apply the probability generating function
+4. Take the inverse Fourier transform
+
+# Klugman
+
+```{r}
+PoissonPGF <- function(x, lambda){
+  x <- lambda * (x - 1)
+  x <- exp(x)
+  x
+}
+
+FormS <- function(px, n){
+  px <- c(px, rep(0, n-4))
+  px <- fft(px)
+  px <- PoissonPGF(px, 3)
+  s <- Re(fft(px, inverse=TRUE) / n)
+}
+
+px <- c(0, 0.5, 0.4, 0.1)
+
+aggs <- lapply(c(8, 4096), FormS, px = px)
+```
+
+# Cyclical overflow
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+df <- data.frame(Set = c(rep(8, 8), rep(4096, 4096)), x = c(1:8, 1:4096), y = unlist(aggs))
+plt <- ggplot(data=filter(df, x<=30), aes(x=x, y=y, color=as.factor(Set))) + geom_point()
+plt <- plt + guides(color = guide_legend(title = NULL))
+plt
+```
+
+# A circle has no end
+
+```{r echo=FALSE}
+RootsOfUnity <- function(n){
+  k <- seq(0, n-1)
+  exponent <- complex(imaginary = 2 * pi * k / n)
+  w <- exp(exponent)
+  w
+}
+
+myRoots <- lapply(c(8, 4096), RootsOfUnity)
+
+df1 <- data.frame(Real = Re(myRoots[[1]]), Imaginary = Im(myRoots[[1]]))
+df1$Set <- 8
+
+df2 <- data.frame(Real = Re(myRoots[[2]]), Imaginary = Im(myRoots[[2]]))
+df2$Set <- 4096
+
+df <- rbind(df1, df2)
+df$Alpha <- 1/ df$Set
+
+plt <- ggplot(df, aes(x = Real, y = Imaginary, color=Set, alpha = 1/Set)) + geom_point()
+plt + theme(legend.position = "none")
+```
+
+```{r, eval=FALSE, include=FALSE}
+x <- c(1,0,0,0,0)
+x1 <- fft(x)
+x1 <- x1^6
+x1 <- fft(x1, inverse = TRUE) %>% Re() %>% round()
+x1 / 5
+```
+
+```{r, eval=FALSE, include=FALSE}
+x <- c(1, 0, 0, 0)
+x <- c(x[1], tail(x, 3) + head(x, 3))
+x <- c(x[1], tail(x, 3) + head(x, 3))
+x <- c(x[1], tail(x, 3) + head(x, 3))
+```
+
