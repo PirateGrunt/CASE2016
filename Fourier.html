@@ -97,11 +97,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="shift-development-patterns" class="slide section level1">
 <h1>Shift development patterns</h1>
 <p>We can also do this</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">AccidentQuarter &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">0.25</span>, <span class="fl">0.25</span>, <span class="fl">0.25</span>, <span class="fl">0.25</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)
-AccidentYear &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.4</span>, <span class="fl">0.4</span>, <span class="fl">0.2</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)
-AccidentYear &lt;-<span class="st"> </span><span class="kw">fft</span>(<span class="kw">fft</span>(AccidentYear) *<span class="st"> </span><span class="kw">fft</span>(AccidentQuarter), <span class="dt">inverse =</span> <span class="ot">TRUE</span>) %&gt;%<span class="st"> </span><span class="kw">Re</span>()
-AccidentYear &lt;-<span class="st"> </span>AccidentYear /<span class="st"> </span><span class="dv">8</span>
-<span class="kw">round</span>(AccidentYear, <span class="dv">4</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">QuarterWeights &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">0.25</span>, <span class="fl">0.25</span>, <span class="fl">0.25</span>, <span class="fl">0.25</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)
+AccidentQuarter &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.4</span>, <span class="fl">0.4</span>, <span class="fl">0.2</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)
+AccidentQuarter &lt;-<span class="st"> </span><span class="kw">fft</span>(<span class="kw">fft</span>(AccidentQuarter) *<span class="st"> </span><span class="kw">fft</span>(QuarterWeights), <span class="dt">inverse =</span> <span class="ot">TRUE</span>) %&gt;%<span class="st"> </span><span class="kw">Re</span>()
+AccidentQuarter &lt;-<span class="st"> </span>AccidentQuarter /<span class="st"> </span><span class="dv">8</span>
+<span class="kw">round</span>(AccidentQuarter, <span class="dv">4</span>)</code></pre></div>
 <pre><code>## [1] 0.00 0.10 0.20 0.25 0.25 0.15 0.05 0.00</code></pre>
 </div>
 <div id="aggregate-loss-distributions" class="slide section level1">
