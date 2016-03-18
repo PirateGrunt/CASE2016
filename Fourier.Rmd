@@ -65,9 +65,9 @@ We can also do this
 ```{r }
 QuarterWeights <- c(0.25, 0.25, 0.25, 0.25, 0, 0, 0, 0)
 AccidentQuarter <- c(0, 0.4, 0.4, 0.2, 0, 0, 0, 0)
-AccidentQuarter <- fft(fft(AccidentQuarter) * fft(QuarterWeights), inverse = TRUE) %>% Re()
-AccidentQuarter <- AccidentQuarter / 8
-round(AccidentQuarter, 4)
+AccidentYear <- fft(fft(AccidentQuarter) * fft(QuarterWeights), inverse = TRUE) %>% Re()
+AccidentYear <- AccidentYear / 8
+round(AccidentYear, 4)
 ```
 
 # Aggregate loss distributions
